@@ -27,11 +27,33 @@ class InMemoryOrderRepository {
     };
   }
 
-  async findAll() {
-    return Array.from(this.orders.values()).map((v) => ({
+  async findAll({ page = 1, pageSize = 20, sortBy = 'creationDate', sortOrder = 'desc' } = {}) {
+    const allowedSort = ['orderId', 'creationDate', 'value'];
+    const normalizedSortBy = allowedSort.includes(sortBy) ? sortBy : 'creationDate';
+    const normalizedSortOrder = sortOrder.toLowerCase() === 'asc' ? 'asc' : 'desc';
+
+    const allData = Array.from(this.orders.values()).map((v) => ({
       order: { ...v.order },
       items: v.items.map((it) => ({ ...it })),
     }));
+
+    allData.sort((a, b) => {
+      const aValue = a.order[normalizedSortBy];
+      const bValue = b.order[normalizedSortBy];
+      if (aValue === bValue) return 0;
+      return normalizedSortOrder === 'asc'
+        ? (aValue > bValue ? 1 : -1)
+        : (aValue < bValue ? 1 : -1);
+    });
+
+    const start = (page - 1) * pageSize;
+    const paged = allData.slice(start, start + pageSize);
+
+    return {
+      data: paged,
+      total: allData.length,
+      sort: { sortBy: normalizedSortBy, sortOrder: normalizedSortOrder },
+    };
   }
 
   async updateOrder(orderId, order) {

@@ -57,9 +57,16 @@ async function findById(orderId) {
   return { order, items };
 }
 
-async function findAll() {
+async function findAll({ page = 1, pageSize = 20, sortBy = 'creationDate', sortOrder = 'desc' } = {}) {
+  const allowedSort = ['orderId', 'creationDate', 'value'];
+  const normalizedSortBy = allowedSort.includes(sortBy) ? sortBy : 'creationDate';
+  const normalizedSortOrder = sortOrder.toLowerCase() === 'asc' ? 'ASC' : 'DESC';
+
+  const offset = (page - 1) * pageSize;
+
   const orders = await all(
-    'SELECT orderId, value, creationDate FROM "Order"',
+    `SELECT orderId, value, creationDate FROM "Order" ORDER BY ${normalizedSortBy} ${normalizedSortOrder} LIMIT ? OFFSET ?`,
+    [pageSize, offset],
   );
   const results = [];
   for (const o of orders) {
@@ -69,7 +76,14 @@ async function findAll() {
     );
     results.push({ order: o, items });
   }
-  return results;
+
+  const totalRow = await get('SELECT COUNT(*) as total FROM "Order"');
+
+  return {
+    data: results,
+    total: totalRow?.total || 0,
+    sort: { sortBy: normalizedSortBy, sortOrder: normalizedSortOrder.toLowerCase() },
+  };
 }
 
 async function updateOrder(orderId, order) {
