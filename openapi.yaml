@@ -1,0 +1,92 @@
+openapi: 3.0.3
+info:
+  title: Orders API
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000
+paths:
+  /auth/login:
+    post:
+      summary: Login e obtenção de token JWT
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Token gerado
+  /order:
+    post:
+      summary: Cria um novo pedido
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '201':
+          description: Pedido criado
+  /order/{orderId}:
+    get:
+      summary: Busca pedido por ID
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Pedido encontrado
+    put:
+      summary: Atualiza pedido
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: string
+          required: true
+      responses:
+        '200':
+          description: Pedido atualizado
+    delete:
+      summary: Remove pedido
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: path
+          name: orderId
+          schema:
+            type: string
+          required: true
+      responses:
+        '204':
+          description: Removido
+  /order/list/all:
+    get:
+      summary: Lista todos os pedidos
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: Lista retornada
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT

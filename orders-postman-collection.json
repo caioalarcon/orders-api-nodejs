@@ -1,0 +1,192 @@
+{
+  "info": {
+    "name": "Orders API Collection",
+    "_postman_id": "orders-api-collection",
+    "description": "Cole\u00e7\u00e3o Postman para testar a Orders API (Node.js, JWT, SQLite).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Login (obter JWT)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin\"\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/auth/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "auth",
+            "login"
+          ]
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "var json = pm.response.json();",
+              "pm.collectionVariables.set('token', json.token);",
+              "pm.test('JWT recebido', function(){ pm.expect(json.token).to.exist; });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Criar pedido",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numeroPedido\": \"v100-postman-01\",\n  \"valorTotal\": 10000,\n  \"dataCriacao\": \"2023-07-19T12:24:11.5299601+00:00\",\n  \"items\": [\n    {\n      \"idItem\": \"2434\",\n      \"quantidadeItem\": 1,\n      \"valorItem\": 1000\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/order",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "order"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Buscar pedido por ID",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/order/v100-postman-01",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "order",
+            "v100-postman-01"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Listar pedidos",
+      "request": {
+        "method": "GET",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/order/list/all",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "order",
+            "list",
+            "all"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Atualizar pedido",
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          },
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"numeroPedido\": \"v100-postman-01\",\n  \"valorTotal\": 15000,\n  \"dataCriacao\": \"2023-07-19T12:24:11.5299601+00:00\",\n  \"items\": [\n    {\n      \"idItem\": \"2434\",\n      \"quantidadeItem\": 2,\n      \"valorItem\": 7500\n    }\n  ]\n}"
+        },
+        "url": {
+          "raw": "http://localhost:3000/order/v100-postman-01",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "order",
+            "v100-postman-01"
+          ]
+        }
+      }
+    },
+    {
+      "name": "Deletar pedido",
+      "request": {
+        "method": "DELETE",
+        "header": [
+          {
+            "key": "Authorization",
+            "value": "Bearer {{token}}"
+          }
+        ],
+        "url": {
+          "raw": "http://localhost:3000/order/v100-postman-01",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3000",
+          "path": [
+            "order",
+            "v100-postman-01"
+          ]
+        }
+      }
+    }
+  ],
+  "variable": [
+    {
+      "key": "token",
+      "value": ""
+    }
+  ]
+}
