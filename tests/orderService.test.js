@@ -33,4 +33,24 @@ describe('OrderService', () => {
       service.createOrder({}),
     ).rejects.toHaveProperty('status', 400);
   });
+
+  it('should list orders with pagination options', async () => {
+    const external = {
+      numeroPedido: 'v100-test-02',
+      valorTotal: 8000,
+      dataCriacao: '2023-07-20T10:00:00.000Z',
+      items: [
+        { idItem: '999', quantidadeItem: 2, valorItem: 4000 },
+      ],
+    };
+
+    await service.createOrder(external);
+    await service.createOrder({ ...external, numeroPedido: 'v100-test-03', valorTotal: 1000 });
+
+    const result = await service.listOrders({ page: 1, pageSize: 1, sortBy: 'value', sortOrder: 'asc' });
+
+    expect(result.total).toBe(2);
+    expect(result.data).toHaveLength(1);
+    expect(result.data[0].order.value).toBe(1000);
+  });
 });

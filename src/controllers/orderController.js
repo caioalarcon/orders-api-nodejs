@@ -1,4 +1,5 @@
 const { toResponseOrder } = require('../models/mappers');
+const logger = require('../config/logger');
 
 class OrderController {
   constructor(orderService) {
@@ -35,9 +36,32 @@ class OrderController {
 
   async list(req, res, next) {
     try {
-      const orders = await this.orderService.listOrders();
-      const response = orders.map((o) => toResponseOrder(o.order, o.items));
-      return res.status(200).json(response);
+      const {
+        page = '1',
+        pageSize = '20',
+        sortBy = 'creationDate',
+        sortOrder = 'desc',
+      } = req.query;
+
+      const options = {
+        page: Math.max(parseInt(page, 10) || 1, 1),
+        pageSize: Math.max(parseInt(pageSize, 10) || 20, 1),
+        sortBy,
+        sortOrder,
+      };
+
+      const { data, total, sort } = await this.orderService.listOrders(options);
+      const response = data.map((o) => toResponseOrder(o.order, o.items));
+      return res.status(200).json({
+        data: response,
+        pagination: {
+          total,
+          page: options.page,
+          pageSize: options.pageSize,
+          sortBy: sort.sortBy,
+          sortOrder: sort.sortOrder,
+        },
+      });
     } catch (err) {
       next(err);
     }
@@ -46,6 +70,16 @@ class OrderController {
   async update(req, res, next) {
     try {
       const { orderId } = req.params;
+      if (req.body.numeroPedido && req.body.numeroPedido !== orderId) {
+        logger.warn({
+          orderId,
+          bodyOrderId: req.body.numeroPedido,
+        }, 'Order id mismatch on update request');
+        return res
+          .status(400)
+          .json({ message: 'numeroPedido deve ser igual ao parâmetro orderId' });
+      }
+
       const updated = await this.orderService.updateOrder(orderId, req.body);
       if (!updated) {
         return res.status(404).json({ message: 'Pedido não encontrado' });

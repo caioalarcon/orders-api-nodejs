@@ -14,8 +14,8 @@ class OrderService {
     return this.orderRepository.findById(orderId);
   }
 
-  async listOrders() {
-    return this.orderRepository.findAll();
+  async listOrders(options) {
+    return this.orderRepository.findAll(options);
   }
 
   async updateOrder(orderId, externalJson) {
