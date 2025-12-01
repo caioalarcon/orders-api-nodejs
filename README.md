@@ -162,6 +162,44 @@ npm test
 - `tests/orderService.test.js`: testa mapeamento e regras do serviço.
 - `tests/authAndOrderEndpoints.test.js`: testa os endpoints com JWT e repositório em memória.
 
+Para testar manualmente com `curl`, após `npm start`:
+
+```bash
+# Falta de token retorna 401
+curl -i http://localhost:3000/order/list/all
+
+# Login e uso do token
+TOKEN=$(curl -s -X POST http://localhost:3000/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{ "username": "admin", "password": "admin" }' | jq -r .token)
+
+# Criação de pedido
+curl -i -X POST http://localhost:3000/order \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "numeroPedido": "v10089015vdb-02",
+    "valorTotal": 12000,
+    "dataCriacao": "2023-07-19T12:24:11.5299601+00:00",
+    "items": [ { "idItem": "2434", "quantidadeItem": 1, "valorItem": 12000 } ]
+  }'
+
+# Atualização com numeroPedido divergente retorna 400
+curl -i -X PUT http://localhost:3000/order/v10089015vdb-02 \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
+  -d '{
+    "numeroPedido": "v10089015vdb-03",
+    "valorTotal": 13000,
+    "dataCriacao": "2023-07-19T12:24:11.5299601+00:00",
+    "items": [ { "idItem": "2434", "quantidadeItem": 1, "valorItem": 13000 } ]
+  }'
+
+# Listagem com paginação
+curl -i "http://localhost:3000/order/list/all?page=1&pageSize=10&sortBy=value&sortOrder=desc" \
+  -H "Authorization: Bearer $TOKEN"
+```
+
 ## OpenAPI
 
 O contrato da API está em `openapi.yaml`. Pode ser aberto em ferramentas como Swagger UI ou Insomnia.
