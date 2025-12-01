@@ -20,6 +20,13 @@ class OrderService {
 
   async updateOrder(orderId, externalJson) {
     const internal = toInternalOrder(externalJson);
+
+    if (internal.orderId !== String(orderId)) {
+      const err = new Error('numeroPedido do corpo precisa ser igual ao parâmetro');
+      err.status = 400;
+      throw err;
+    }
+
     return this.orderRepository.updateOrder(orderId, internal);
   }
 

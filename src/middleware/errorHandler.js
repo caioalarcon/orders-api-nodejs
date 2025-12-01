@@ -1,5 +1,11 @@
+const logger = require('../utils/logger');
+
 function errorHandler(err, req, res, next) {
-  console.error(err);
+  logger.error('Unhandled error', {
+    err,
+    method: req.method,
+    path: req.originalUrl,
+  });
 
   if (err.status) {
     return res.status(err.status).json({ message: err.message });

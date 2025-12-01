@@ -27,6 +27,15 @@ function toInternalOrder(external) {
     throw err;
   }
 
+  const hasInvalidItem = items.some(
+    (it) => it == null || it.idItem == null || it.quantidadeItem == null || it.valorItem == null,
+  );
+  if (hasInvalidItem) {
+    const err = new Error('items devem conter idItem, quantidadeItem e valorItem');
+    err.status = 400;
+    throw err;
+  }
+
   return {
     orderId: String(numeroPedido),
     value: Number(valorTotal),
